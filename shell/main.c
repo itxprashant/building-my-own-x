@@ -40,6 +40,24 @@ int main() {
 
         if (args[0] == NULL) continue;
 
+        if (strcmp(args[0], "cd") == 0) {
+            if (args[1] == NULL) {
+                perror("cd: no argument");
+            } else if (strcmp(args[1], "~") == 0) {
+                if (chdir(getenv("HOME")) == -1) {
+                    perror("cd");
+                }
+            }
+            
+            else {
+                if (chdir(args[1]) == -1) {
+                    perror("cd");
+                }
+            }
+
+            continue;
+        }
+
         pid_t pid = fork();
 
         if (pid == 0) {
