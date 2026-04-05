@@ -10,11 +10,13 @@
 
 int main() {
 
+    setenv("SHELL", "myshell", 1); 
+
     char line[MAX_LINE];
 
     while (true) {
-
-        printf("myshell> ");
+        char *current_dir = getcwd(NULL, 0);
+        printf("myshell> %s > ", current_dir);
 
         fflush(stdout);
 
@@ -40,19 +42,32 @@ int main() {
 
         if (args[0] == NULL) continue;
 
-        if (strcmp(args[0], "cd") == 0) {
-            if (args[1] == NULL) {
-                perror("cd: no argument");
-            } else if (strcmp(args[1], "~") == 0) {
-                if (chdir(getenv("HOME")) == -1) {
-                    perror("cd");
+        for (int j=0; args[j] != NULL; j++) {
+            if (args[j][0] == '$') {
+                char *var_name = &args[j][1];
+                char *var_value = getenv(var_name);
+
+                if (var_value != NULL) {
+                    args[j] = var_value;
+                } else {
+                    args[j] = "";
                 }
             }
+        }
+
+        if (strcmp(args[0], "cd") == 0) {
+
+            char *target_dir;
+            if (args[1] == NULL) {
+                target_dir = getenv("HOME");
+            } else if (strcmp(args[1], "~") == 0) {
+                target_dir = getenv("HOME");
+            } else {
+                target_dir = args[1];
+            }
             
-            else {
-                if (chdir(args[1]) == -1) {
-                    perror("cd");
-                }
+            if (chdir(target_dir) == -1) {
+                perror("cd");
             }
 
             continue;
