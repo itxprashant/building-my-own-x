@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #define MAX_LINE 1024
 
@@ -35,7 +38,20 @@ int main() {
             args[arg_count] = strtok(NULL, " ");
         }
 
-        printf("Args[0] is %s\n", args[0]);
-    }
+        if (args[0] == NULL) continue;
 
+        pid_t pid = fork();
+
+        if (pid == 0) {
+            if (execvp(args[0], args) == -1) {
+                perror("execvp");
+            }
+            exit(EXIT_FAILURE);
+        } else if (pid < 0){
+            perror("Fork failed");
+        } else {
+            wait(NULL);
+        }
+    }
+    return EXIT_SUCCESS;
 }
